@@ -1,4 +1,5 @@
 const mix = require('laravel-mix');
+require('laravel-mix-merge-manifest');
 
 /*
  |--------------------------------------------------------------------------
@@ -11,7 +12,17 @@ const mix = require('laravel-mix');
  |
  */
 
-mix.js('resources/js/app.js', 'public/js')
-    .postCss('resources/css/app.css', 'public/css', [
-        //
-    ]);
+mix.sass('resources/sass/app.scss', 'public/css');
+    
+mix.js('resources/js/app.js', 'public/js').extract([
+    'jquery',
+    'popper.js',
+    'bootstrap',
+    'lodash',
+    'vue',
+    'axios',
+    'feather-icons'
+]);
+
+mix.version();
+mix.mergeManifest();
