@@ -15,6 +15,7 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    @stack('styles')
 </head>
 <body>
     <div id="app">
@@ -73,11 +74,34 @@
         </nav>
 
         <main class="py-4">
+            <div class="container">
+                @if (isset($errors) && $errors->any())
+                    <div class="alert alert-danger" role="alert">
+                        <ul>
+                            @foreach($errors->all() as $error)
+                              <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                        {{ session('status') }}
+                    </div>
+                @endif
+                @if (session()->has('success'))
+                    <div class="alert alert-success" role="alert">
+                        <ul>
+                            @foreach(session()->get('success') as $message)
+                              <li>{{ $message }}</li>
+                            @endforeach
+                        </ul>
+                        {{ session('status') }}
+                    </div>
+                @endif
+            </div>
             @yield('content')
         </main>
-        <script src="{{ mix('js/manifest.js') }}"></script>
-        <script src="{{ mix('js/vendor.js') }}"></script>
-        <script src="{{ mix('js/app.js') }}"></script>
     </div>
+    <script src="{{ mix('js/manifest.js') }}"></script>
+    <script src="{{ mix('js/vendor.js') }}"></script>
+    <script src="{{ mix('js/app.js') }}"></script>
+    @stack('scripts')
 </body>
 </html>
