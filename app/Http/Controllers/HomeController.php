@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Currency;
+use App\Models\{Currency, PaymentPlatform};
 
 class HomeController extends Controller
 {
@@ -26,6 +26,7 @@ class HomeController extends Controller
     {
         return view('home')->with([
             'currencies' => Currency::all(),
+            'paymentPlatforms' => PaymentPlatform::all(),
         ]);
     }
 }
