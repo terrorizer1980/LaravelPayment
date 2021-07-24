@@ -4,13 +4,14 @@ namespace App\Traits;
 
 use GuzzleHttp\Client;
 
-trait ConsumesExternalService
+trait ConsumesExternalServices
 {
     public function makeRequest($method, $requestUrl,
         $queryParams = [], $formParams = [], $headers = [], $isJsonRequest = false)
     {   
         $client = new Client([
-            'base_uri' => $this->base_uri
+            'base_uri' => $this->baseURI,
+            'verify' => false
         ]);
         
         if (method_exists($this, 'resolveAuthorization')) {
@@ -18,7 +19,7 @@ trait ConsumesExternalService
         }
         
         $response = $client->request($method, $requestUrl, [
-            $isJsonRequest ? 'json' : 'body' => $formParams,
+            ($isJsonRequest ? 'json' : 'form_params') => $formParams,
             'headers' => $headers,
             'query' => $queryParams,
         ])->getBody()

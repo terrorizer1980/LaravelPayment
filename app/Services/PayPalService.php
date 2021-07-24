@@ -1,10 +1,12 @@
 <?php
 
-use App\Traits\ConsumesExternalService;
+namespace App\Services;
+
+use App\Traits\ConsumesExternalServices;
 
 class PayPalService
 {
-    use ConsumesExternalService;
+    use ConsumesExternalServices;
     
     protected $baseURI;
     protected $clientID;
@@ -19,11 +21,18 @@ class PayPalService
     
     public function resolveAuthorization(&$queryParams, &$formParams, &$headers)
     {
-        //
+        $headers['Authorization'] = $this->resolveAccessToken();
     }
     
     public function decodeResponse($response)
     {
-        //
+        return json_decode($response);
+    }
+    
+    public function resolveAccessToken()
+    {
+        $credentials = base64_encode("{$this->clientID}:{$this->clientSecret}");
+
+        return "Basic {$credentials}";
     }
 }
