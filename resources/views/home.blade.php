@@ -13,7 +13,24 @@
                       <div class="row">
                         <div class="col-auto">
                           <label>@lang('dashboard.payments.amount'):</label>
-                          <input type="number" name="amount" min="5" step="0.01" class="form-control" value="{{ mt_rand(500, 100000) / 100 }}" />
+                          <input type="number"
+                            name="amount"
+                            min="5"
+                            step="0.01"
+                            class="form-control"
+                            value="{{ mt_rand(500, 100000) / 100 }}"
+                            required
+                          />
+                        </div>
+                        <div class="col-auto">
+                          <label>@lang('dashboard.payments.currency'):</label>
+                          <select class="form-select" name="currency" required>
+                              @foreach($currencies as $currency)
+                                <option value="{{ $currency->iso }}">
+                                  {{ Str::upper($currency->iso) }}
+                                </option>
+                              @endforeach
+                          </select>
                         </div>
                         <div class="text-center mt-3">
                           <button id="btnPay"  class="btn btn-primary btn-lg" action="submit">@lang('dashboard.payments.pay')</button>
