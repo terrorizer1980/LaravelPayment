@@ -33,25 +33,32 @@
                               @endforeach
                           </select>
                         </div>
-                        <div class="text-center mt-3">
-                          <button id="btnPay"  class="btn btn-primary btn-lg" action="submit">@lang('dashboard.payments.pay')</button>
-                        </div>
                       </div>
                       <div class="row mt-3">
                         <div class="row">
                           <label>@lang('dashboard.payments.platform_select')</label>
-                          <div class="form-group">
+                          <div class="form-group" id="toggler">
                             <div class="btn-group btn-group-toggle"
                                 data-toggle="buttons">
                                 @foreach($paymentPlatforms as $paymentPlatform)
-                                <label class="btn btn-secondary rounded mt-2 p-1 m-2" >
-                                  <input type="radio" name="payment_platform" value="{{ $paymentPlatform->id }}" required>
-                                  <img src="{{ asset($paymentPlatform->image) }}" class="img-thumbnail"> 
-                                </label>
+                                    <label class="btn btn-secondary rounded mt-2 p-1 m-2" 
+                                        data-bs-target="#{{ $paymentPlatform->name }}Collapse"
+                                        data-bs-toggle="collapse">
+                                      <input type="radio" name="payment_platform" value="{{ $paymentPlatform->id }}" required>
+                                      <img src="{{ asset($paymentPlatform->image) }}" class="img-thumbnail"> 
+                                    </label>
                                 @endforeach
                             </div>
+                            @foreach($paymentPlatforms as $paymentPlatform)
+                                <div id="{{ $paymentPlatform->name }}Collapse" class="collapse" data-bs-parent="#toggler">
+                                  @includeIf('components.'. Str::lower($paymentPlatform->name) . '-collapse')
+                                </div>
+                            @endforeach
                           </div>
                         </div>
+                      </div>
+                      <div class="text-center mt-3">
+                        <button id="btnPay"  class="btn btn-primary btn-lg" action="submit">@lang('dashboard.payments.pay')</button>
                       </div>
                   </form>
                 </div>

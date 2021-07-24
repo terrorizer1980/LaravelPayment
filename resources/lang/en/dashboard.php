@@ -8,7 +8,7 @@ return [
         'pay' => 'Pay',
         'currency' => 'Currency',
         'platform_select' => 'Select the desired payment platform.',
-        
+        'redirect' => 'You will be redirected to the :platform checkout page.'
     ]
 ];
 
