@@ -3,9 +3,10 @@
 namespace App\Services;
 
 use App\Traits\ConsumesExternalServices;
+use App\Contracts\PaymentService;
 use Str;
 
-class PayPalService
+class PayPalService implements PaymentService
 {
     use ConsumesExternalServices;
     
@@ -62,4 +63,43 @@ class PayPalService
             ],
             isJsonRequest: true);
     }
+    
+    public function capturePayment($approvalId)
+    {
+        return $this->makeRequest(
+            'POST', 
+            "/v2/checkout/orders/{$approvalId}/capture",
+            headers: [
+                'Content-Type' => 'application/json',
+            ],
+        );
+    }
+
+    public function handlePayment(array $validated)
+    {
+        $order = $this->createOrder($validated['amount'], $validated['currency']);
+        
+        session()->put('approvalId', $order->id);
+        
+        return redirect(collect($order->links)->where('rel', 'approve')->first()?->href);
+    }
+
+    public function handleApproval()
+    {
+        if (session()->has('approvalId')) {           
+            $payment = $this->capturePayment(session()->get('approvalId'));
+            $amount = $payment->purchase_units[0]->payments->captures[0]->amount;
+            return redirect()
+                    ->route('home')
+                    ->withSuccess(['payment' =>
+                        "Thanks {$payment->payer->name->given_name}.
+                        We received your {$amount->value} {$amount->currency_code} payment."
+                    ]);
+        }
+        
+        return redirect()
+                ->route('home')
+                ->withErrors('We cannot capture the payment. Please try again later!');
+    }
+
 }
