@@ -40,6 +40,8 @@ class PayPalService implements PaymentService
     
     public function createOrder($amount, $currency)
     {
+        $factor = $this->resolveFactor($currency);
+
         return $this->makeRequest(
             method: 'POST',
             requestUrl: '/v2/checkout/orders',
@@ -49,7 +51,7 @@ class PayPalService implements PaymentService
                     0 => [
                         'amount' => [
                             'currency_code' => Str::upper($currency),
-                            'value' => $amount
+                            'value' => round($amount * $factor) / $factor,
                         ]
                     ]
                 ],
@@ -58,7 +60,7 @@ class PayPalService implements PaymentService
                     'shipping_preference' => 'NO_SHIPPING',
                     'user_action' => 'PAY_NOW',
                     'return_url' => route('approval'),
-                    'cancel_url' => route('cancelled'),
+                    'cancel_url' => route('cancel'),
                 ]
             ],
             isJsonRequest: true);
@@ -101,5 +103,15 @@ class PayPalService implements PaymentService
                 ->route('home')
                 ->withErrors('We cannot capture the payment. Please try again later!');
     }
-
+    
+    public function resolveFactor($currency)
+    {
+        $zeroDecimalCurrencies = ['jpy'];
+        
+        if (in_array($currency, $zeroDecimalCurrencies)) {
+            return 1;
+        }
+        
+        return 100;
+    }
 }

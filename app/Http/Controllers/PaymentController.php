@@ -24,6 +24,8 @@ class PaymentController extends Controller
     
     public function cancel()
     {
-//        $validated = $request->validated();
+        return redirect()
+                ->route('home')
+                ->withErrors('You cancelled the payment');
     }
 }
