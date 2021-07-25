@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Traits\ConsumesExternalServices;
+use Str;
 
 class PayPalService
 {
@@ -34,5 +35,31 @@ class PayPalService
         $credentials = base64_encode("{$this->clientID}:{$this->clientSecret}");
 
         return "Basic {$credentials}";
+    }
+    
+    public function createOrder($amount, $currency)
+    {
+        return $this->makeRequest(
+            method: 'POST',
+            requestUrl: '/v2/checkout/orders',
+            formParams: [
+                'intent' => 'CAPTURE',
+                'purchase_units' => [
+                    0 => [
+                        'amount' => [
+                            'currency_code' => Str::upper($currency),
+                            'value' => $amount
+                        ]
+                    ]
+                ],
+                'application_context' => [
+                    'brand_name' => config('app.name'),
+                    'shipping_preference' => 'NO_SHIPPING',
+                    'user_action' => 'PAY_NOW',
+                    'return_url' => route('approval'),
+                    'cancel_url' => route('cancelled'),
+                ]
+            ],
+            isJsonRequest: true);
     }
 }
