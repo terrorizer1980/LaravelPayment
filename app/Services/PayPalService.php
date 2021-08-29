@@ -21,62 +21,6 @@ class PayPalService implements PaymentService
         $this->clientSecret = config('services.paypal.client_secret');
     }
     
-    public function resolveAuthorization(&$queryParams, &$formParams, &$headers)
-    {
-        $headers['Authorization'] = $this->resolveAccessToken();
-    }
-    
-    public function decodeResponse($response)
-    {
-        return json_decode($response);
-    }
-    
-    public function resolveAccessToken()
-    {
-        $credentials = base64_encode("{$this->clientID}:{$this->clientSecret}");
-
-        return "Basic {$credentials}";
-    }
-    
-    public function createOrder($amount, $currency)
-    {
-        $factor = $this->resolveFactor($currency);
-
-        return $this->makeRequest(
-            method: 'POST',
-            requestUrl: '/v2/checkout/orders',
-            formParams: [
-                'intent' => 'CAPTURE',
-                'purchase_units' => [
-                    0 => [
-                        'amount' => [
-                            'currency_code' => Str::upper($currency),
-                            'value' => round($amount * $factor) / $factor,
-                        ]
-                    ]
-                ],
-                'application_context' => [
-                    'brand_name' => config('app.name'),
-                    'shipping_preference' => 'NO_SHIPPING',
-                    'user_action' => 'PAY_NOW',
-                    'return_url' => route('approval'),
-                    'cancel_url' => route('cancel'),
-                ]
-            ],
-            isJsonRequest: true);
-    }
-    
-    public function capturePayment($approvalId)
-    {
-        return $this->makeRequest(
-            'POST', 
-            "/v2/checkout/orders/{$approvalId}/capture",
-            headers: [
-                'Content-Type' => 'application/json',
-            ],
-        );
-    }
-
     public function handlePayment(array $validated)
     {
         $order = $this->createOrder($validated['amount'], $validated['currency']);
@@ -104,7 +48,63 @@ class PayPalService implements PaymentService
                 ->withErrors('We cannot capture the payment. Please try again later!');
     }
     
-    public function resolveFactor($currency)
+    public function resolveAuthorization(&$queryParams, &$formParams, &$headers)
+    {
+        $headers['Authorization'] = $this->resolveAccessToken();
+    }
+    
+    public function decodeResponse($response)
+    {
+        return json_decode($response);
+    }
+    
+    protected function resolveAccessToken()
+    {
+        $credentials = base64_encode("{$this->clientID}:{$this->clientSecret}");
+
+        return "Basic {$credentials}";
+    }
+    
+    protected function createOrder($amount, $currency)
+    {
+        $factor = $this->resolveFactor($currency);
+
+        return $this->makeRequest(
+            method: 'POST',
+            requestUrl: '/v2/checkout/orders',
+            formParams: [
+                'intent' => 'CAPTURE',
+                'purchase_units' => [
+                    0 => [
+                        'amount' => [
+                            'currency_code' => Str::upper($currency),
+                            'value' => round($amount * $factor) / $factor,
+                        ]
+                    ]
+                ],
+                'application_context' => [
+                    'brand_name' => config('app.name'),
+                    'shipping_preference' => 'NO_SHIPPING',
+                    'user_action' => 'PAY_NOW',
+                    'return_url' => route('approval'),
+                    'cancel_url' => route('cancel'),
+                ]
+            ],
+            isJsonRequest: true);
+    }
+    
+    protected function capturePayment($approvalId)
+    {
+        return $this->makeRequest(
+            'POST', 
+            "/v2/checkout/orders/{$approvalId}/capture",
+            headers: [
+                'Content-Type' => 'application/json',
+            ],
+        );
+    }
+    
+    protected function resolveFactor($currency)
     {
         $zeroDecimalCurrencies = ['jpy'];
         

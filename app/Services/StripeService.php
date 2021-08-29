@@ -21,21 +21,6 @@ class StripeService implements PaymentService
         $this->secret = config('services.stripe.secret');
     }
     
-    public function resolveAuthorization(&$queryParams, &$formParams, &$headers)
-    {
-        //
-    }
-    
-    public function decodeResponse($response)
-    {
-        return json_decode($response);
-    }
-    
-    public function resolveAccessToken()
-    {
-        //
-    }
-
     public function handlePayment(array $validated)
     {
         //
@@ -46,7 +31,22 @@ class StripeService implements PaymentService
         //
     }
     
-    public function resolveFactor($currency)
+    public function resolveAuthorization(&$queryParams, &$formParams, &$headers)
+    {
+        $headers['Authorization'] = $this->resolveAccessToken();
+    }
+    
+    public function decodeResponse($response)
+    {
+        return json_decode($response);
+    }
+    
+    protected function resolveAccessToken()
+    {
+        return "Bearer {$this->secret}";
+    }
+    
+    protected function resolveFactor($currency)
     {
         $zeroDecimalCurrencies = ['jpy'];
         
