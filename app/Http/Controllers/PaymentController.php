@@ -17,6 +17,8 @@ class PaymentController extends Controller
     {
         $validated = $request->validated();
         
+        dd($validated);
+        
         session()->put('paymentPlatformId', $validated['payment_platform']);
 
         return $this->resolver->resolveService($validated['payment_platform'])->handlePayment($validated);    
