@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Traits\ConsumesExternalServices;
 use App\Contracts\PaymentService;
+use Stripe\PaymentIntent;
+use Stripe\Stripe;
 use Str;
 
 class StripeService implements PaymentService
@@ -44,6 +46,19 @@ class StripeService implements PaymentService
     protected function resolveAccessToken()
     {
         return "Bearer {$this->secret}";
+    }
+    
+    public function createIntent($value, $currency, $paymentMethod )
+    {
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        return PaymentIntent::create([
+            'amount' => $value * $this->resolveFactor($currency),
+            'currency' => Str::lower($currency),
+            'payment_method' => $paymentMethod,
+            'confirmation_method' => 'manual',
+            'payment_method_types' => ['card'],
+        ]);
     }
     
     protected function resolveFactor($currency)
