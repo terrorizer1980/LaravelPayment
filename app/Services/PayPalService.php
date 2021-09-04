@@ -9,24 +9,24 @@ use Str;
 class PayPalService implements PaymentService
 {
     use ConsumesExternalServices;
-    
+
     protected $baseURI;
     protected $clientID;
     protected $clientSecret;
-    
+
     public function __construct()
     {
         $this->baseURI = config('services.paypal.base_uri');
         $this->clientID = config('services.paypal.client_id');
         $this->clientSecret = config('services.paypal.client_secret');
     }
-    
+
     public function handlePayment(array $validated)
     {
         $order = $this->createOrder($validated['amount'], $validated['currency']);
-        
+
         session()->put('approvalId', $order->id);
-        
+
         return redirect(collect($order->links)->where('rel', 'approve')->first()?->href);
     }
 
@@ -42,29 +42,29 @@ class PayPalService implements PaymentService
                         We received your {$amount->value} {$amount->currency_code} payment."
                     ]);
         }
-        
+
         return redirect()
                 ->route('home')
                 ->withErrors('We cannot capture the payment. Please try again later!');
     }
-    
-    public function resolveAuthorization(&$queryParams, &$formParams, &$headers)
+
+    protected function resolveAuthorization(&$queryParams, &$formParams, &$headers)
     {
         $headers['Authorization'] = $this->resolveAccessToken();
     }
-    
-    public function decodeResponse($response)
+
+    protected function decodeResponse($response)
     {
         return json_decode($response);
     }
-    
+
     protected function resolveAccessToken()
     {
         $credentials = base64_encode("{$this->clientID}:{$this->clientSecret}");
 
         return "Basic {$credentials}";
     }
-    
+
     protected function createOrder($amount, $currency)
     {
         $factor = $this->resolveFactor($currency);
@@ -92,7 +92,7 @@ class PayPalService implements PaymentService
             ],
             isJsonRequest: true);
     }
-    
+
     protected function capturePayment($approvalId)
     {
         return $this->makeRequest(
@@ -103,15 +103,15 @@ class PayPalService implements PaymentService
             ],
         );
     }
-    
+
     protected function resolveFactor($currency)
     {
         $zeroDecimalCurrencies = ['jpy'];
-        
+
         if (in_array($currency, $zeroDecimalCurrencies)) {
             return 1;
         }
-        
+
         return 100;
     }
 }

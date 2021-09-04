@@ -11,11 +11,11 @@ use Str;
 class StripeService implements PaymentService
 {
     use ConsumesExternalServices;
-    
+
     protected $baseURI;
     protected $key;
     protected $secret;
-    
+
     public function __construct()
     {
         $this->baseURI = config('services.stripe.base_uri');
@@ -32,23 +32,23 @@ class StripeService implements PaymentService
     {
         //
     }
-    
-    public function resolveAuthorization(&$queryParams, &$formParams, &$headers)
+
+    protected function resolveAuthorization(&$queryParams, &$formParams, &$headers)
     {
         $headers['Authorization'] = $this->resolveAccessToken();
     }
-    
-    public function decodeResponse($response)
+
+    protected function decodeResponse($response)
     {
         return json_decode($response);
     }
-    
+
     protected function resolveAccessToken()
     {
         return "Bearer {$this->secret}";
     }
-    
-    public function createIntent($value, $currency, $paymentMethod )
+
+    protected function createIntent($value, $currency, $paymentMethod )
     {
         Stripe::setApiKey(config('services.stripe.secret'));
 
@@ -60,7 +60,7 @@ class StripeService implements PaymentService
             'payment_method_types' => ['card'],
         ]);
     }
-    
+
     protected function resolveFactor($currency)
     {
         $zeroDecimalCurrencies = ['jpy'];

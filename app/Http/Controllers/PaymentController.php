@@ -12,16 +12,14 @@ class PaymentController extends Controller
     ) {
         $this->middleware('auth');
     }
-    
+
     public function pay(PaymentStoreRequest $request)
     {
         $validated = $request->validated();
-        
-        dd($validated);
-        
+
         session()->put('paymentPlatformId', $validated['payment_platform']);
 
-        return $this->resolver->resolveService($validated['payment_platform'])->handlePayment($validated);    
+        return $this->resolver->resolveService($validated['payment_platform'])->handlePayment($validated);
     }
     
     public function approval()
@@ -34,7 +32,7 @@ class PaymentController extends Controller
                 ->route('home')
                 ->withErrors('We cannot retrieve your payment platform. Try again, please!');
     }
-    
+
     public function cancel()
     {
         return redirect()
