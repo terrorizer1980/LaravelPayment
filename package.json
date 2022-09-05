@@ -21,7 +21,7 @@
     "dependencies": {
         "bootstrap": "^5.0.2",
         "jquery": "^3.6.0",
-        "laravel-mix-merge-manifest": "^2.0.0",
+        "laravel-mix-merge-manifest": "^2.1.0",
         "popper": "^1.0.1"
     }
 }
